@@ -42,4 +42,7 @@ private:
     // Helper methods
     std::string generate_output_filename(const DockerAIModel& model);
     bool validate_downloaded_file(const std::string& file_path);
+    
+    // Static curl callback
+    static size_t write_string_callback(void* contents, size_t size, size_t nmemb, void* userp);
 };

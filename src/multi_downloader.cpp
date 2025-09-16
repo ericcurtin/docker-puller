@@ -58,13 +58,26 @@ bool MultiDownloader::supports_range_requests(const std::string& url, const std:
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
     
     CURLcode res = curl_easy_perform(curl);
+    
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    
     cleanup_curl_handle(curl);
     
-    if (res != CURLE_OK) return false;
+    if (res != CURLE_OK || response_code >= 400) {
+        std::cout << "Range request test failed, using single connection" << std::endl;
+        return false;
+    }
     
     // Convert to lowercase and check for Accept-Ranges: bytes
     std::transform(headers.begin(), headers.end(), headers.begin(), ::tolower);
-    return headers.find("accept-ranges: bytes") != std::string::npos;
+    bool supports_ranges = headers.find("accept-ranges: bytes") != std::string::npos;
+    
+    if (!supports_ranges) {
+        std::cout << "Server doesn't advertise range support" << std::endl;
+    }
+    
+    return supports_ranges;
 }
 
 size_t MultiDownloader::get_existing_file_size(const std::string& output_path) {
@@ -103,11 +116,17 @@ bool MultiDownloader::download_file(const std::string& url,
         }
         
         bool success = false;
-        if (max_connections_ > 1 && supports_range_requests(url, auth_token) && file_size > 1024 * 1024) {
+        // For now, use single connection due to Docker registry limitations
+        // Multi-connection support can be enabled for other registries that properly support ranges
+        if (false && max_connections_ > 1 && supports_range_requests(url, auth_token) && file_size > 1024 * 1024) {
             // Use multi-connection download for large files that support ranges
+            std::cout << "Using multi-connection download (" << max_connections_ << " connections)" << std::endl;
             success = download_with_chunks(url, output_path, auth_token, file_size);
         } else {
             // Use single connection download
+            if (max_connections_ > 1) {
+                std::cout << "Using single connection (Docker registry doesn't support range requests properly)" << std::endl;
+            }
             success = download_single_connection(url, output_path, auth_token);
         }
         

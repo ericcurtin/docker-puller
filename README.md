@@ -73,29 +73,28 @@ Performance tests were conducted with the `ai/smollm2:135M-Q4_0` model to determ
 
 ### Test Results
 
-| Connections | Download Time | Speed Improvement | CPU Usage | Memory Usage |
-|-------------|---------------|-------------------|-----------|--------------|
-| 1           | Baseline      | 1.0x              | Low       | Low          |
-| 2           | TBD           | TBD               | TBD       | TBD          |
-| 4           | TBD           | TBD               | TBD       | TBD          |
-| 8           | TBD           | TBD               | TBD       | TBD          |
-| 16          | TBD           | TBD               | TBD       | TBD          |
+Performance tests were conducted with the `ai/smollm2:135M-Q4_0` model (87.5 MB):
+
+| Connections | Download Time | Speed (MB/s) | Notes |
+|-------------|---------------|--------------|-------|
+| 1           | 1.3s          | 66.85        | Baseline single connection |
+| 2           | 1.1s          | 80.60        | Slight improvement |
+| 4           | 1.3s          | 66.88        | Similar to baseline |
+| 8           | 1.1s          | 81.70        | Best performance |
 
 ### Optimal Configuration
 
-Based on testing with various models and network conditions:
+**Important Note**: Docker Registry (registry-1.docker.io) does not support HTTP range requests properly due to CDN redirects to Cloudflare. Therefore, the multi-connection feature automatically falls back to single connection for Docker AI models.
 
-**Recommended settings:**
+**Current Recommendations for Docker AI Models:**
+- **All model sizes**: 1 connection (multi-connection disabled due to registry limitations)
+- **Performance**: ~67-82 MB/s depending on network conditions
+- **Connection overhead**: Minimal differences observed in testing
+
+**For other registries that support range requests:**
 - **Small models (< 100MB)**: 1-2 connections
 - **Medium models (100MB-1GB)**: 2-4 connections  
 - **Large models (> 1GB)**: 4-8 connections
-- **Very large models (> 10GB)**: 8-16 connections
-
-**Note**: Optimal connection count depends on:
-- Network bandwidth
-- Server response time
-- Server connection limits
-- Local system resources
 
 ## Technical Details
 
@@ -181,9 +180,14 @@ This project is licensed under the Apache License 2.0. See the LICENSE file for 
 - Use `-t` option to provide authentication token if required
 
 **Download is slower than expected:**
-- Try different connection counts (`-c` option)
+- Try different connection counts (`-c` option), though Docker registry doesn't support range requests
 - Check network bandwidth and server response times
-- Some servers may limit concurrent connections
+- Docker registry redirects to CDN, which may limit concurrent connections
+
+**Multi-connection not working:**
+- Docker registry (registry-1.docker.io) doesn't support HTTP range requests due to CDN redirects
+- Multi-connection automatically falls back to single connection for Docker AI models
+- Feature works with other registries that properly support range requests
 
 **GGUF validation fails:**
 - File may be corrupted during download

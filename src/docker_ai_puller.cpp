@@ -95,11 +95,7 @@ std::string DockerAIPuller::get_manifest(const DockerAIModel& model) {
     std::string response;
     curl_easy_setopt(curl, CURLOPT_URL, manifest_url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, [](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
-        size_t total_size = size * nmemb;
-        static_cast<std::string*>(userp)->append(static_cast<const char*>(contents), total_size);
-        return total_size;
-    });
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_string_callback);
     
     // Set headers for Docker AI manifest
     struct curl_slist* headers = nullptr;
@@ -114,8 +110,13 @@ std::string DockerAIPuller::get_manifest(const DockerAIModel& model) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "docker-ai-puller/1.0");
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
     
     CURLcode res = curl_easy_perform(curl);
+    
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
@@ -124,6 +125,14 @@ std::string DockerAIPuller::get_manifest(const DockerAIModel& model) {
         std::cerr << "Failed to get manifest: " << curl_easy_strerror(res) << std::endl;
         return "";
     }
+    
+    if (response_code != 200) {
+        std::cerr << "Manifest request failed with HTTP " << response_code << std::endl;
+        std::cerr << "Response: " << response.substr(0, 500) << std::endl;
+        return "";
+    }
+    
+    std::cout << "Successfully retrieved manifest (" << response.size() << " bytes)" << std::endl;
     
     return response;
 }
@@ -167,9 +176,49 @@ std::string DockerAIPuller::get_blob_digest_for_gguf(const std::string& manifest
 }
 
 std::string DockerAIPuller::get_auth_token_for_registry(const DockerAIModel& model) {
-    // For now, return empty string. In a real implementation, this would
-    // handle Docker registry authentication flow
-    std::cout << "Note: Anonymous access to registry (no authentication)" << std::endl;
+    // Get authentication token from Docker auth service
+    std::string auth_url = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:" 
+                         + model.namespace_name + "/" + model.repository + ":pull";
+    
+    CURL* curl = curl_easy_init();
+    if (!curl) return "";
+    
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, auth_url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_string_callback);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "docker-ai-puller/1.0");
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+    
+    CURLcode res = curl_easy_perform(curl);
+    
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    
+    curl_easy_cleanup(curl);
+    
+    if (res != CURLE_OK) {
+        std::cerr << "Failed to get auth token: " << curl_easy_strerror(res) << std::endl;
+        return "";
+    }
+    
+    if (response_code != 200) {
+        std::cerr << "Auth request failed with HTTP " << response_code << std::endl;
+        std::cerr << "Response: " << response.substr(0, 500) << std::endl;
+        return "";
+    }
+    
+    try {
+        json auth_response = json::parse(response);
+        if (auth_response.contains("token")) {
+            std::cout << "Successfully obtained authentication token" << std::endl;
+            return auth_response["token"];
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to parse auth response: " << e.what() << std::endl;
+    }
+    
     return "";
 }
 
@@ -209,4 +258,10 @@ bool DockerAIPuller::validate_downloaded_file(const std::string& file_path) {
     
     std::cout << "GGUF validation successful" << std::endl;
     return true;
+}
+
+size_t DockerAIPuller::write_string_callback(void* contents, size_t size, size_t nmemb, void* userp) {
+    size_t total_size = size * nmemb;
+    static_cast<std::string*>(userp)->append(static_cast<const char*>(contents), total_size);
+    return total_size;
 }
