@@ -1,0 +1,29 @@
+# Build directories
+build/
+*.o
+*.a
+*.so
+
+# IDE files
+.vscode/
+.clion/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test output files
+*.gguf
+*.tmp.*
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+
+# Executables
+docker-puller
+test_basic
