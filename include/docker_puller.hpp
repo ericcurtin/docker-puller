@@ -65,6 +65,16 @@ private:
     bool downloadWithRanges(const std::string& download_url, const std::string& output_path,
                            size_t total_size, const DownloadConfig& config, 
                            ProgressCallback progress_cb);
+    
+    // Single connection download
+    bool downloadSingleConnection(const std::string& download_url, const std::string& output_path,
+                                size_t total_size, size_t existing_size, const DownloadConfig& config,
+                                ProgressCallback progress_cb);
+    
+    // Multi-connection download
+    bool downloadMultiConnection(const std::string& download_url, const std::string& output_path,
+                               size_t total_size, size_t existing_size, const DownloadConfig& config,
+                               ProgressCallback progress_cb);
 
     // Utility functions
     std::vector<DownloadRange> calculateRanges(size_t total_size, int num_connections);
@@ -76,6 +86,7 @@ private:
 
     // CURL callbacks
     static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
+    static size_t fileWriteCallback(void* contents, size_t size, size_t nmemb, void* userp);
     static int progressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, 
                                curl_off_t ultotal, curl_off_t ulnow);
 

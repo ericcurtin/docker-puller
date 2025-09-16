@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/docker-puller.dir/link.d "CMakeFiles/docker-puller.dir/src/main.cpp.o" "CMakeFiles/docker-puller.dir/src/docker_puller.cpp.o" "CMakeFiles/docker-puller.dir/src/gguf_validator.cpp.o" -o docker-puller  /usr/lib/x86_64-linux-gnu/libcurl.so -lpthread

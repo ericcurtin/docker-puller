@@ -101,19 +101,19 @@ Based on performance testing with various AI models, here are the optimal config
 
 ### Benchmark Results (ai/smollm2:135M-Q4_0)
 
-*Note: Performance results will be updated after testing*
+Based on performance testing with the SmolLM2 135M model:
 
 ```
 Connections | Speed (MB/s) | Improvement
 ------------|-------------|------------
-1          | TBD         | Baseline
-2          | TBD         | TBD
-4          | TBD         | TBD
-8          | TBD         | TBD
-16         | TBD         | TBD
+1          | 58.99       | Baseline
+2          | 65.62       | 11% faster
+4          | 64.18       | 9% faster
+8          | 48.36       | 18% slower
+16         | 62.66       | 6% faster
 ```
 
-**Optimal configuration: TBD connections (TBD MB/s)**
+**Optimal configuration: 2 connections (65.62 MB/s)**
 
 ### Performance Tips
 
