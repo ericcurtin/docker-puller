@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/docker-ai-puller.dir/link.d "CMakeFiles/docker-ai-puller.dir/src/main.cpp.o" "CMakeFiles/docker-ai-puller.dir/src/docker_ai_puller.cpp.o" "CMakeFiles/docker-ai-puller.dir/src/gguf_validator.cpp.o" "CMakeFiles/docker-ai-puller.dir/src/performance_tester.cpp.o" -o docker-ai-puller  -lcurl
