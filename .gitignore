@@ -1,0 +1,47 @@
+# Build directories
+build/
+build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Object files
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+
+# Executables
+docker-puller
+docker-puller.exe
+
+# IDE files
+.vscode/
+.idea/
+*.sln
+*.vcxproj*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.part*
+
+# Downloaded model files
+*.gguf
+*.bin
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
