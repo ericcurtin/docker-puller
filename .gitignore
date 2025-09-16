@@ -1,0 +1,40 @@
+# Build directories
+build/
+bin/
+lib/
+
+# Compiled object files
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+
+# Executables
+docker-puller
+*.exe
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Test and temporary files
+*.gguf
+*.bin
+test_download.*
+performance_results.txt
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
