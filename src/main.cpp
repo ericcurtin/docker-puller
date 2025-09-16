@@ -22,6 +22,7 @@ void print_usage(const char* program_name) {
               << "  -o, --output PATH      Output file path (default: model filename)\n"
               << "  -r, --retries NUM      Number of retry attempts (default: 3)\n"
               << "  -v, --verbose          Verbose output\n"
+              << "  -n, --dry-run          Dry run (don't actually download)\n"
               << "  -h, --help             Show this help message\n";
 }
 
@@ -51,12 +52,14 @@ int main(int argc, char* argv[]) {
     int retries = 3;
     std::string output_path;
     bool verbose = false;
+    bool dry_run = false;
     
     static struct option long_options[] = {
         {"connections", required_argument, 0, 'c'},
         {"output", required_argument, 0, 'o'},
         {"retries", required_argument, 0, 'r'},
         {"verbose", no_argument, 0, 'v'},
+        {"dry-run", no_argument, 0, 'n'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -64,7 +67,7 @@ int main(int argc, char* argv[]) {
     int opt;
     int option_index = 0;
     
-    while ((opt = getopt_long(argc, argv, "c:o:r:vh", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "c:o:r:vnh", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'c':
                 connections = std::atoi(optarg);
@@ -85,6 +88,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 'v':
                 verbose = true;
+                break;
+            case 'n':
+                dry_run = true;
                 break;
             case 'h':
                 print_usage(argv[0]);
@@ -150,6 +156,19 @@ int main(int argc, char* argv[]) {
         }
         
         std::string download_url = registry.get_download_url(model, gguf_layer->digest);
+        
+        if (verbose) {
+            std::cout << "Download URL: " << download_url << "\n";
+        }
+        
+        if (dry_run) {
+            std::cout << "Dry run mode: would download " << utils::format_bytes(gguf_layer->size) 
+                      << " from " << download_url << "\n";
+            std::cout << "Would save to: " << output_path << "\n";
+            std::cout << "Dry run completed successfully!\n";
+            return 0;
+        }
+        
         std::string auth_token = registry.get_auth_token(model);
         
         std::vector<std::string> download_headers = {
