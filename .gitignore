@@ -1,0 +1,37 @@
+# Build directories
+build/
+bin/
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Compiled binaries
+docker-ai-puller
+*.exe
+
+# Downloaded model files for testing
+*.gguf
+
+# Test outputs
+test_output/
+performance_results.txt
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
