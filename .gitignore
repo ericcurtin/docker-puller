@@ -1,0 +1,36 @@
+# Build artifacts
+build/
+!build/README.md
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.exe
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# IDE files
+.vscode/
+.idea/
+*.vcxproj*
+*.sln
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Downloaded test files
+*.gguf
+*.bin
+
+# Temporary files
+*~
+*.tmp
+*.swp
+.#*
